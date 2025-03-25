@@ -1,116 +1,122 @@
 #include <stdio.h>
 
+// Definir o tamanho do tabuleiro
 #define TAMANHO_TABULEIRO 10
-#define TAMANHO_NAVIO 3
 
 // Função para exibir o tabuleiro
 void exibirTabuleiro(int tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO]) {
-    printf("Tabuleiro de Batalha Naval:\n");
     for (int i = 0; i < TAMANHO_TABULEIRO; i++) {
         for (int j = 0; j < TAMANHO_TABULEIRO; j++) {
-            printf("%2d ", tabuleiro[i][j]);
+            if (tabuleiro[i][j] == 0)
+                printf("0 "); // Água
+            else if (tabuleiro[i][j] == 3)
+                printf("3 "); // Navio
+            else if (tabuleiro[i][j] == 5)
+                printf("5 "); // Área afetada pela habilidade
         }
         printf("\n");
     }
 }
 
-// Função para posicionar o navio horizontalmente
-int posicionarNavioHorizontal(int tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO], int linha, int coluna) {
-    // Verifica se o navio pode ser posicionado sem ultrapassar os limites do tabuleiro
-    if (coluna + TAMANHO_NAVIO > TAMANHO_TABULEIRO) return 0;
+// Função para aplicar a habilidade em cone
+void aplicarHabilidadeCone(int tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO], int origemX, int origemY) {
+    int cone[5][5] = {
+        {0, 0, 1, 0, 0},
+        {0, 1, 1, 1, 0},
+        {1, 1, 1, 1, 1},
+        {0, 1, 1, 1, 0},
+        {0, 0, 1, 0, 0}
+    };
 
-    // Verifica se o navio se sobrepõe a outro
-    for (int i = 0; i < TAMANHO_NAVIO; i++) {
-        if (tabuleiro[linha][coluna + i] != 0) return 0; // Há sobreposição
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; j++) {
+            if (cone[i][j] == 1) {
+                int x = origemX + i - 2; // Ajuste de índice
+                int y = origemY + j - 2; // Ajuste de índice
+                if (x >= 0 && x < TAMANHO_TABULEIRO && y >= 0 && y < TAMANHO_TABULEIRO) {
+                    if (tabuleiro[x][y] == 0) // Só marcar as posições de água
+                        tabuleiro[x][y] = 5;
+                }
+            }
+        }
     }
-
-    // Posiciona o navio
-    for (int i = 0; i < TAMANHO_NAVIO; i++) {
-        tabuleiro[linha][coluna + i] = 3; // Marca as posições ocupadas pelo navio com 3
-    }
-    return 1;
 }
 
-// Função para posicionar o navio verticalmente
-int posicionarNavioVertical(int tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO], int linha, int coluna) {
-    // Verifica se o navio pode ser posicionado sem ultrapassar os limites do tabuleiro
-    if (linha + TAMANHO_NAVIO > TAMANHO_TABULEIRO) return 0;
+// Função para aplicar a habilidade em cruz
+void aplicarHabilidadeCruz(int tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO], int origemX, int origemY) {
+    int cruz[5][5] = {
+        {0, 0, 1, 0, 0},
+        {0, 1, 1, 1, 0},
+        {1, 1, 1, 1, 1},
+        {0, 1, 1, 1, 0},
+        {0, 0, 1, 0, 0}
+    };
 
-    // Verifica se o navio se sobrepõe a outro
-    for (int i = 0; i < TAMANHO_NAVIO; i++) {
-        if (tabuleiro[linha + i][coluna] != 0) return 0; // Há sobreposição
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; j++) {
+            if (cruz[i][j] == 1) {
+                int x = origemX + i - 2; // Ajuste de índice
+                int y = origemY + j - 2; // Ajuste de índice
+                if (x >= 0 && x < TAMANHO_TABULEIRO && y >= 0 && y < TAMANHO_TABULEIRO) {
+                    if (tabuleiro[x][y] == 0) // Só marcar as posições de água
+                        tabuleiro[x][y] = 5;
+                }
+            }
+        }
     }
-
-    // Posiciona o navio
-    for (int i = 0; i < TAMANHO_NAVIO; i++) {
-        tabuleiro[linha + i][coluna] = 3; // Marca as posições ocupadas pelo navio com 3
-    }
-    return 1;
 }
 
-// Função para posicionar o navio na diagonal (crescente)
-int posicionarNavioDiagonalCrescente(int tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO], int linha, int coluna) {
-    // Verifica se o navio pode ser posicionado na diagonal crescente sem ultrapassar os limites
-    if (linha + TAMANHO_NAVIO > TAMANHO_TABULEIRO || coluna + TAMANHO_NAVIO > TAMANHO_TABULEIRO) return 0;
+// Função para aplicar a habilidade em octaedro
+void aplicarHabilidadeOctaedro(int tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO], int origemX, int origemY) {
+    int octaedro[5][5] = {
+        {0, 1, 1, 1, 0},
+        {1, 1, 1, 1, 1},
+        {1, 1, 1, 1, 1},
+        {1, 1, 1, 1, 1},
+        {0, 1, 1, 1, 0}
+    };
 
-    // Verifica se o navio se sobrepõe a outro
-    for (int i = 0; i < TAMANHO_NAVIO; i++) {
-        if (tabuleiro[linha + i][coluna + i] != 0) return 0; // Há sobreposição
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; j++) {
+            if (octaedro[i][j] == 1) {
+                int x = origemX + i - 2; // Ajuste de índice
+                int y = origemY + j - 2; // Ajuste de índice
+                if (x >= 0 && x < TAMANHO_TABULEIRO && y >= 0 && y < TAMANHO_TABULEIRO) {
+                    if (tabuleiro[x][y] == 0) // Só marcar as posições de água
+                        tabuleiro[x][y] = 5;
+                }
+            }
+        }
     }
-
-    // Posiciona o navio na diagonal crescente
-    for (int i = 0; i < TAMANHO_NAVIO; i++) {
-        tabuleiro[linha + i][coluna + i] = 3; // Marca as posições ocupadas pelo navio com 3
-    }
-    return 1;
 }
 
-// Função para posicionar o navio na diagonal (decrescente)
-int posicionarNavioDiagonalDecrescente(int tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO], int linha, int coluna) {
-    // Verifica se o navio pode ser posicionado na diagonal decrescente sem ultrapassar os limites
-    if (linha + TAMANHO_NAVIO > TAMANHO_TABULEIRO || coluna - TAMANHO_NAVIO < -1) return 0;
-
-    // Verifica se o navio se sobrepõe a outro
-    for (int i = 0; i < TAMANHO_NAVIO; i++) {
-        if (tabuleiro[linha + i][coluna - i] != 0) return 0; // Há sobreposição
+// Função para colocar navios no tabuleiro
+void colocarNavios(int tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO], int x, int y, int direcao) {
+    for (int i = 0; i < 3; i++) { // Tamanho do navio é 3
+        if (direcao == 0) { // Horizontal
+            if (y + i < TAMANHO_TABULEIRO)
+                tabuleiro[x][y + i] = 3;
+        } else { // Vertical
+            if (x + i < TAMANHO_TABULEIRO)
+                tabuleiro[x + i][y] = 3;
+        }
     }
-
-    // Posiciona o navio na diagonal decrescente
-    for (int i = 0; i < TAMANHO_NAVIO; i++) {
-        tabuleiro[linha + i][coluna - i] = 3; // Marca as posições ocupadas pelo navio com 3
-    }
-    return 1;
 }
 
 int main() {
-    // Inicializa o tabuleiro com água (0)
+    // Inicializar o tabuleiro com água (0)
     int tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO] = {0};
 
-    // Coordenadas para os navios horizontais
-    int linhaHorizontal = 2, colunaHorizontal = 4;
+    // Colocar navios no tabuleiro
+    colocarNavios(tabuleiro, 1, 1, 0); // Navio horizontal na linha 1
+    colocarNavios(tabuleiro, 4, 4, 1); // Navio vertical na coluna 4
 
-    // Coordenadas para os navios verticais
-    int linhaVertical = 5, colunaVertical = 6;
+    // Aplicar as habilidades no tabuleiro
+    aplicarHabilidadeCone(tabuleiro, 5, 5);
+    aplicarHabilidadeCruz(tabuleiro, 3, 3);
+    aplicarHabilidadeOctaedro(tabuleiro, 7, 7);
 
-    // Coordenadas para os navios diagonais (crescente e decrescente)
-    int linhaDiagonalCrescente = 0, colunaDiagonalCrescente = 0;
-    int linhaDiagonalDecrescente = 6, colunaDiagonalDecrescente = 9;
-
-    // Posiciona os navios
-    if (!posicionarNavioHorizontal(tabuleiro, linhaHorizontal, colunaHorizontal)) {
-        printf("Falha ao posicionar navio horizontal.\n");
-    }
-    if (!posicionarNavioVertical(tabuleiro, linhaVertical, colunaVertical)) {
-        printf("Falha ao posicionar navio vertical.\n");
-    }
-    if (!posicionarNavioDiagonalCrescente(tabuleiro, linhaDiagonalCrescente, colunaDiagonalCrescente)) {
-        printf("Falha ao posicionar navio diagonal crescente.\n");
-    }
-    if (!posicionarNavioDiagonalDecrescente(tabuleiro, linhaDiagonalDecrescente, colunaDiagonalDecrescente)) {
-        printf("Falha ao posicionar navio diagonal decrescente.\n");
-    }
-
-    // Exibe o tabuleiro
+    // Exibir o tabuleiro
     exibirTabuleiro(tabuleiro);
 
     return 0;
